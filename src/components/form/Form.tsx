@@ -11,8 +11,8 @@ const valores = {
 
 const SelectTypeColumn = ({ valor, onChange }: { valor: string, onChange: (valores: any) => void }) => {
     return (
-        <div className="w-full flex justify-between items-center pt-2">
-            <select className="w-full px-3 py-2 bg-white bg-opacity-10 text-black text-sm rounded-lg" onChange={(e) => onChange(e.target.value)} value={valor}>
+        <div className="w-full flex justify-between items-center">
+            <select className="w-full px-3 py-2 bg-white text-black text-sm rounded-lg" onChange={(e) => onChange(e.target.value)} value={valor}>
                 {
                     Object.keys(valores).map((n, i) => {
                         const valor = Object.values(valores)[i]
@@ -28,6 +28,7 @@ export const FormUseXLSX = () => {
     const {
         columns,
         dataRender,
+        data,
         downloadFile,
         file,
         handleFileUpload,
@@ -42,10 +43,11 @@ export const FormUseXLSX = () => {
         onAddNewColumns,
         onRemoveNewColumns,
         newColumns,
+        onResetForm
     } = useFormXLSX()
 
     return (
-        <div className="flex flex-col justify-start items-start text-black py-5 mx-auto">
+        <div className="flex flex-col justify-start items-start text-black p-5 w-full">
 
             {useColumnView && <ModalNewColumn
                 onAddNewColumns={onAddNewColumns}
@@ -56,7 +58,7 @@ export const FormUseXLSX = () => {
             />
             }
 
-            {!use && <div className="max-w-[500px] mx-auto w-full">
+            {!use && <div className="flex flex-col w-full">
                 <div className="w-full flex justify-end items-center px-5 pb-2">
                     <button
                         type="button"
@@ -94,11 +96,11 @@ export const FormUseXLSX = () => {
                 </div>
             </div>}
 
-            {use && <div className="w-full px-5 pt-10 mx-auto">
+            {use && <div className="w-full flex flex-col min-h-[95vh] justify-between items-start">
 
-                <div className="w-full flex justify-between items-start">
-                    <div className="w-full max-w-[1000px] me-auto bg-zinc-800 p-5">
-                        <div className="flex gap-2 w-full pb-5">
+                <div className="w-full flex justify-between items-start gap-10">
+                    <div className="w-full max-w-[1000px] bg-zinc-800 p-5">
+                        <div className="flex gap-2 w-full pb-5 text-white">
                             {
                                 valoresColumn.map((_, i) => {
                                     return (
@@ -112,7 +114,7 @@ export const FormUseXLSX = () => {
                             }
                         </div>
 
-                        <div className="w-full flex max-h-20 h-20 overflow-y-auto overflow-x-hidden">
+                        <div className="w-full flex max-h-[50vh] h-[50vh] overflow-y-auto overflow-x-hidden">
                             <Table
                                 columns={columns}
                                 data={dataRender}
@@ -120,20 +122,61 @@ export const FormUseXLSX = () => {
                         </div>
                     </div>
 
-                    <div className="w-full ps-10 flex justify-end items-end">
-                        <div>
-                            <button type="button" onClick={() => setUseColumnView(true)} className="w-fit flex justify-center items-center bg-blue-500 border border-white text-white px-3 py-2 rounded">
-                                NEW COLUMN
-                            </button>
+                    <div className="w-full flex flex-col justify-start items-start gap-2">
+                        <div className="w-full flex justify-between items-end gap-2">
+                            <div className="flex text-white">
+                                TOTAL DE TODOS LOS REGISTROS TOMADOS: {data?.length}
+                            </div>
+                            <div className="flex gap-2">
+                                <div className="flex justify-end items-end">
+                                    <button type="button" onClick={() => setUseColumnView(true)} className="w-fit flex justify-center items-center bg-blue-500 border border-white text-white px-3 py-2 rounded text-nowrap">
+                                        NEW COLUMN
+                                    </button>
+                                </div>
+                                <div className="flex justify-end items-end">
+                                    <button type="button" onClick={onResetForm} className="w-fit flex justify-center items-center bg-red-500 border border-white text-white px-3 py-2 rounded text-nowrap">
+                                        REINICIAR
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+                        {newColumns.length > 0 && <div className="w-full flex bg-white p-5">
+                            <div className="w-full">
+                                <h3 className="text-md font-semibold">NUEVAS COLUMNAS</h3>
+                                <ul className="space-y-2">
+                                    {newColumns.map((colGroup) => {
+                                        const type = colGroup?.type
+                                        const isJoin = type === "1"
+
+                                        return (
+                                            <li key={colGroup.id} className="flex items-center gap-2 border border-black px-5 py-2 rounded">
+                                                <span className="flex-grow font-medium">
+                                                    {type}
+                                                </span>
+
+                                                {isJoin && <span className="flex-grow font-medium">
+                                                    {colGroup?.columns.map((c: any) => c.valor).join(" + ")}
+                                                </span>}
+                                                <button
+                                                    onClick={() => onRemoveNewColumns(colGroup.id)}
+                                                    className="bg-red-500 text-white px-2 py-1 rounded"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </li>
+                                        )
+                                    })}
+                                </ul>
+                            </div>
+                        </div>}
                     </div>
                 </div>
 
-                <div className="w-full flex justify-end items-center px-5 pb-2">
+                <div className="w-full flex justify-end items-start">
                     <button
                         type="button"
                         onClick={downloadFile}
-                        className="min-w-[200px] bg-custom-azul border border-white px-3 py-2 rounded text-white"
+                        className="min-w-[200px] bg-green-500 border border-white px-3 py-2 rounded text-white"
                     >
                         {loadingDonwload ? "DESCARGANDO EDITABLE..." : "DESCARGAR EDITABLE"}
                     </button>

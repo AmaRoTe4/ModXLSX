@@ -11,12 +11,13 @@ export default function useFormXLSX() {
     const [newColumns, setNewColumns] = useState<any[]>([])
     const [valoresColumn, setValoresColumn] = useState<string[]>([])
     const [loadingDonwload, setLoadingDonwload] = useState(false)
-    const { file, handleFileUpload, loading, loadingSubmit, onDownloadFile, valoresUpload } = useXLSX()
+    const { file, handleFileUpload, loading, onReset, onDownloadFile, valoresUpload } = useXLSX()
 
     useEffect(() => {
-        const valores_use = [...valoresUpload]
-        const use_use = valores_use.length > 0
-        const columns_use = use_use ? Object.keys(valores_use.sort((a, b) => Object.keys(b)?.length - Object.keys(a)?.length)?.[0]) : []
+        const valores = [...valoresUpload]
+        const use_use = valores.length > 0
+        const columns_use = use_use ? Object.keys(valores.sort((a, b) => Object.keys(b)?.length - Object.keys(a)?.length)?.[0]) : []
+        const valores_use = valores.filter((n, i) => Object.keys(n).length === columns_use.length)
         const data_use = use_use ? valores_use : []
         const data_render_user = data_use.filter((_, i) => i < 20)
 
@@ -41,13 +42,12 @@ export default function useFormXLSX() {
                 const { columns, condicion, type } = n
                 const { num, valor } = condicion
 
-                if (valor !== "" && type === "1") {
+                if (type === "1") {
                     const v = valores?.[num];
-                    if (typeof v === "undefined") return;
+                    if (typeof v === "undefined" && valor !== "") return;
 
                     let valores_mod = Number(Number(valores[columns[0].valor]).toFixed(2));
-                    const no_aplica = valor.toString() !== v?.toString() || !valores_mod
-
+                    const no_aplica = (valor.toString() !== v?.toString() && valor !== "") || !valores_mod
 
                     if (no_aplica) return valores = { ...valores, [`col-${i + 1}`]: valores_mod };
                     const valor_use = Number(columns[2].valor)
@@ -109,11 +109,23 @@ export default function useFormXLSX() {
         setNewColumns([...newColumns].filter(n => n.id !== id))
     }
 
+    const onResetForm = () => {
+        onReset()
+        setUseColumnView(false)
+        setUse(false)
+        setLoadingDonwload(false)
+        setColumns([])
+        setData([])
+        setDataRender([])
+        setNewColumns([])
+        setValoresColumn([])
+    }
+
     return {
         loading,
         handleFileUpload,
         valoresUpload,
-        loadingSubmit,
+
         file,
         onDownloadFile,
         loadingDonwload,
@@ -128,6 +140,7 @@ export default function useFormXLSX() {
         valoresColumn,
         setValoresColumn,
         onChange,
-        newColumns
+        newColumns,
+        onResetForm
     }
 }

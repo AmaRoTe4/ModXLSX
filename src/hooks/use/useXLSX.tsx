@@ -5,7 +5,6 @@ import { downloadFile } from "../../functions/csv/dowloadCSV"
 
 export default function useXLSX() {
     const [loading, setLoading] = useState(false)
-    const [loadingSubmit, setLoadingSubmit] = useState(false)
     const [valoresUpload, setValoresUpload] = useState<any[]>([])
     const [file, setFile] = useState<File | undefined>(undefined);
 
@@ -48,11 +47,17 @@ export default function useXLSX() {
         }
     };
 
+    const onReset = () => {
+        setLoading(false)
+        setFile(undefined)
+        setValoresUpload([])
+    }
+
     return {
+        onReset,
         loading,
         handleFileUpload,
         valoresUpload,
-        loadingSubmit,
         file,
         onDownloadFile
     }

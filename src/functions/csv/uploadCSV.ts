@@ -23,10 +23,16 @@ export const parseFile = (file: File): Promise<Array<any>> => {
         try {
           const data = new Uint8Array(event.target?.result as ArrayBuffer);
           const workbook = XLSX.read(data, { type: "array" });
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet);
-          resolve(jsonData);
+
+          let res: any[] = [];
+
+          for (let i = 0; i < workbook.SheetNames.length; i++) {
+            const worksheet = workbook.Sheets[workbook.SheetNames[i]];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+            res = [...res, ...jsonData];
+          }
+
+          resolve(res);
         } catch (error) {
           reject(error);
         }

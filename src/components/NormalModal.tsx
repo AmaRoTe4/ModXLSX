@@ -1,5 +1,3 @@
-import { SVGRemove } from "../svg/remove";
-
 interface props {
     onClose: () => void;
     type_close?: boolean
@@ -13,8 +11,9 @@ export const NormalModal = ({ onClose, children, type_close = true }: props) => 
                 {children}
             </div>
             <span className="fixed top-1 md:top-5 right-5 md:right-10">
-                <button type="button" onClick={(e) => onClose()}>
-                    <SVGRemove className="h-[50px] fill-white" />
+                <button type="button" onClick={(e) => onClose()} className="text-white">
+                    Close
+                    {/*<SVGRemove className="h-[50px] fill-white" />*/}
                 </button>
             </span>
         </div>

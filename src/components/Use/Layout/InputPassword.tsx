@@ -1,6 +1,6 @@
 
-import SVGEye from "../../../svg/eye"
-import SVGEyeSlash from "../../../svg/eye-slash"
+//import SVGEye from "../../../svg/eye"
+//import SVGEyeSlash from "../../../svg/eye-slash"
 import { PropsInputText } from "../../../types_use"
 import { ChangeEvent, useState } from "react"
 
@@ -20,7 +20,7 @@ export const InputPassword = ({ key_value, title, error, status_error = false, o
             <div className="flex justify-start items-center w-full gap-2">
                 <div className="flex">
                     <button type="button" onClick={() => setView(!view)} className="hover:scale-110">
-                        {!view ? <SVGEye className="min-h-[25px] min-w-[25px] max-w-[25px] max-h-[25px]" /> : <SVGEyeSlash className="min-h-[25px] min-w-[25px] max-w-[25px] max-h-[25px]" />}
+                        {/*{!view ? <SVGEye className="min-h-[25px] min-w-[25px] max-w-[25px] max-h-[25px]" /> : <SVGEyeSlash className="min-h-[25px] min-w-[25px] max-w-[25px] max-h-[25px]" />}*/}
                     </button>
                 </div>
                 <div className="w-full bg-white text-black">
