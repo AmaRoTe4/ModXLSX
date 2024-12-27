@@ -1,44 +1,96 @@
 import { useEffect, useState } from "react"
 import useXLSX from "./use/useXLSX"
 import vna from "../const/vna"
+import { useFormStore } from "../store/form"
+
+const base_col = [
+    "CODIGO",
+    "DESCRIPCION",
+    "UNIDAD",
+    "MONEDA",
+    "P. LISTA",
+    "P. NETO",
+    "P. NETO OFERTA",
+    "P.V.Público sugerido FINAL"
+]
+
+const base_sheet = [
+    "LINEA MARINE y Zest",
+    "INDUMENTARIA",
+    "LENTES DMF",
+    "SEÑUELOS",
+    "ANZUELOS mustad",
+    "CAÑAS",
+    "REELS",
+    "ACC.PARA PESCA",
+    "MULTIF.CABOS, PIOLINES Y TANZAS",
+    "ART.PARA CAMPING",
+    "TERMOS Y BIDONES",
+    "CONSERVADORAS",
+    "LINTERNAS",
+    "CUCHILLERIA",
+    "ACCESORIOS PARA CAZA",
+    "CARTUCHOS",
+    "ESCOPETAS",
+    "FUSILES y PISTOLAS",
+    "BALAS",
+]
 
 export default function useFormXLSX() {
-    const [useColumnView, setUseColumnView] = useState(false)
-    const [use, setUse] = useState(false)
-    const [columns, setColumns] = useState<any[]>([])
-    const [data, setData] = useState<any[]>([])
-    const [dataRender, setDataRender] = useState<any[]>([])
-    const [newColumns, setNewColumns] = useState<any[]>([])
-    const [valoresColumn, setValoresColumn] = useState<string[]>([])
-    const [loadingDonwload, setLoadingDonwload] = useState(false)
-    const { file, handleFileUpload, loading, onReset, onDownloadFile, valoresUpload } = useXLSX()
+    const {
+        getSheetRespete, getColumns, getData, getDataRender, getLoadingDonwload, getNewColumns, getUse, getUseColumnView, getValoresColumn, setColumns, setData, setDataRender, setLoadingDonwload, setNewColumns, setSheetRespete, setUse, setUseColumnView, setValoresColumn, setDataForSheet, getValoresDonwload, getDataForSheet
+    } = useFormStore()
+    const {
+        file,
+        handleFileUpload,
+        loading,
+        onReset,
+        onDownloadFile,
+        valoresUpload,
+        valoresUploadForSheet
+    } = useXLSX(getSheetRespete, getColumns, () => setUse(false))
+    const [textNewColumna, setTextNewColumna] = useState("")
 
     useEffect(() => {
+        if (getSheetRespete.length === 0)
+            setSheetRespete(base_sheet.map(n => n.trim().toLowerCase()))
+        if (getColumns.length === 0)
+            setColumns(base_col.map(n => n.trim().toLowerCase()))
+    }, [])
+
+    useEffect(() => {
+        setValoresColumn(getColumns.map((_, i) => "1"))
+    }, [getColumns])
+
+    useEffect(() => {
+        if (getData.length > 0 && valoresUpload.length === 0) {
+            setUse(true)
+            return;
+        }
+
         const valores = [...valoresUpload]
         const use_use = valores.length > 0
-        const columns_use = use_use ? Object.keys(valores.sort((a, b) => Object.keys(b)?.length - Object.keys(a)?.length)?.[0]) : []
-        const valores_use = valores.filter((n, i) => Object.keys(n).length === columns_use.length)
-        const data_use = use_use ? valores_use : []
+        const data_use = use_use ? valores : []
         const data_render_user = data_use.filter((_, i) => i < 20)
 
         setUse(use_use)
         setDataRender(data_render_user)
-        setColumns(columns_use)
         setData(data_use)
-        setValoresColumn(columns_use.map((_, i) => "1"))
-    }, [valoresUpload, file])
+        setValoresColumn(getColumns.map((_, i) => "1"))
+        setDataForSheet(valoresUploadForSheet)
+    }, [valoresUpload, file, getColumns])
 
-    const normalizeData = (data: any[]) => {
+    const normalizeData = (data: any[], useFinal: boolean) => {
         const { add, divide, por, remove } = vna.valores_new_columns
 
-        return data.map((row, i) => {
+        const res = data.map((row, i) => {
             let valores = { ...row }
 
             const keys = Object.keys(row)
 
-            if (keys.length === 0 || keys.length !== columns.length) return valores
+            if (keys.length === 0) return valores
 
-            newColumns.map((n, i) => {
+            getNewColumns.map((n, i) => {
                 const { columns, condicion, type } = n
                 const { num, valor } = condicion
 
@@ -82,31 +134,57 @@ export default function useFormXLSX() {
             })
 
             keys.forEach((key, index) => {
-                if (valoresColumn[index] === "2") {
-                    delete valores?.[key]
-                }
+                if (getValoresColumn[index] === "2") delete valores?.[key]
+                if (!getColumns.includes(key)) delete valores?.[key]
             })
 
             return valores
         })
+
+        if (!useFinal) return res;
+
+        return res.map(n => {
+            let res: any = {}
+
+            getValoresDonwload.map((m, i) => {
+                if (m.type === "2") {
+                    const valor = n[m.valor]
+                    res[m.name] = !valor ? "0" : valor
+                } else {
+                    res[m.name] = m.valor
+                }
+            })
+
+            return res;
+        })
     }
 
-    const downloadFile = async () => {
-        if (loadingDonwload) return;
+    const downloadFile = async (useFinal: boolean = false, useSheet: boolean = false) => {
+        if (getLoadingDonwload) return;
 
         setLoadingDonwload(true)
-        await onDownloadFile(normalizeData(data))
+        await onDownloadFile(normalizeData(getData, useFinal))
+
+        if (useSheet) {
+            const keys = Object.keys(getDataForSheet)
+
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i]
+                const sheet = getDataForSheet[key]
+                await onDownloadFile(normalizeData(sheet, useFinal), key)
+            }
+        }
         setLoadingDonwload(false)
     }
 
-    const onChange = ({ index }: { index: number }) => (valor: string) => setValoresColumn(valoresColumn.map((n, j) => j === index ? valor : n))
+    const onChange = ({ index }: { index: number }) => (valor: string) => setValoresColumn(getValoresColumn.map((n, j) => j === index ? valor : n))
 
     const onAddNewColumns = (newColumn: any[]) => {
-        setNewColumns([...newColumns, newColumn])
+        setNewColumns([...getNewColumns, newColumn])
     }
 
     const onRemoveNewColumns = (id: string) => {
-        setNewColumns([...newColumns].filter(n => n.id !== id))
+        setNewColumns([...getNewColumns].filter(n => n.id !== id))
     }
 
     const onResetForm = () => {
@@ -121,6 +199,16 @@ export default function useFormXLSX() {
         setValoresColumn([])
     }
 
+    const insertColumn = () => {
+        if (textNewColumna.trim() === "") return;
+        setColumns([...getColumns, textNewColumna])
+        setTextNewColumna("")
+    }
+
+    const removeColumn = (valor: string) => {
+        setColumns(getColumns.filter((n) => n !== valor))
+    }
+
     return {
         loading,
         handleFileUpload,
@@ -128,19 +216,28 @@ export default function useFormXLSX() {
 
         file,
         onDownloadFile,
-        loadingDonwload,
         downloadFile,
-        useColumnView, setUseColumnView,
-        use, setUse,
-        columns, setColumns,
-        data, setData,
-        dataRender, setDataRender,
+        setUse,
+        setUseColumnView,
+        getLoadingDonwload,
+        getUseColumnView,
+        getUse,
+        getColumns,
+        getData,
+        getDataRender,
+        getValoresColumn,
+        getNewColumns,
+        setColumns,
+        setData,
+        setDataRender,
         onAddNewColumns,
         onRemoveNewColumns,
-        valoresColumn,
         setValoresColumn,
         onChange,
-        newColumns,
-        onResetForm
+        onResetForm,
+        insertColumn,
+        removeColumn,
+        textNewColumna,
+        setTextNewColumna
     }
 }

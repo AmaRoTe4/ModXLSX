@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react"
-import useXLSX from "../../hooks/use/useXLSX"
 import { Table } from "../Use/Layout/Table"
 import useFormXLSX from "../../hooks/useFormXLSX"
 import ModalNewColumn from "./ModalNewColumn"
+import ModalDownload from "./ModalDownload"
+import { useFormStore } from "../../store/form"
 
 const valores = {
     use: "1",
@@ -26,39 +26,46 @@ const SelectTypeColumn = ({ valor, onChange }: { valor: string, onChange: (valor
 
 export const FormUseXLSX = () => {
     const {
-        columns,
-        dataRender,
-        data,
+        getColumns,
+        getDataRender,
+        getData,
+        getLoadingDonwload,
+        getUseColumnView,
+        getUse,
+        getValoresColumn,
+        getNewColumns,
         downloadFile,
         file,
         handleFileUpload,
         loading,
-        loadingDonwload,
         onChange,
         onDownloadFile,
         setUseColumnView,
-        useColumnView,
-        use,
-        valoresColumn,
         onAddNewColumns,
         onRemoveNewColumns,
-        newColumns,
-        onResetForm
+        onResetForm,
+        insertColumn,
+        removeColumn,
+        textNewColumna,
+        setTextNewColumna,
     } = useFormXLSX()
+    const { getModalDonwloadView, setModalDonwloadView } = useFormStore()
 
     return (
         <div className="flex flex-col justify-start items-start text-black p-5 w-full">
 
-            {useColumnView && <ModalNewColumn
+            {getModalDonwloadView && <ModalDownload />}
+
+            {getUseColumnView && <ModalNewColumn
                 onAddNewColumns={onAddNewColumns}
-                columns={columns}
-                newColumns={newColumns}
+                columns={getColumns}
+                newColumns={getNewColumns}
                 onClose={() => setUseColumnView(false)}
                 onRemoveNewColumns={onRemoveNewColumns}
             />
             }
 
-            {!use && <div className="flex flex-col w-full">
+            {!getUse && <div className="flex flex-col w-full">
                 <div className="w-full flex justify-end items-center px-5 pb-2">
                     <button
                         type="button"
@@ -96,17 +103,17 @@ export const FormUseXLSX = () => {
                 </div>
             </div>}
 
-            {use && <div className="w-full flex flex-col min-h-[95vh] justify-between items-start">
+            {getUse && <div className="w-full flex flex-col min-h-[95vh] justify-between items-start">
 
                 <div className="w-full flex justify-between items-start gap-10">
                     <div className="w-full max-w-[1000px] bg-zinc-800 p-5">
                         <div className="flex gap-2 w-full pb-5 text-white">
                             {
-                                valoresColumn.map((_, i) => {
+                                getValoresColumn.map((_, i) => {
                                     return (
                                         <SelectTypeColumn
                                             key={i}
-                                            valor={valoresColumn[i]}
+                                            valor={getValoresColumn[i]}
                                             onChange={onChange({ index: i })}
                                         />
                                     )
@@ -116,8 +123,8 @@ export const FormUseXLSX = () => {
 
                         <div className="w-full flex max-h-[50vh] h-[50vh] overflow-y-auto overflow-x-hidden">
                             <Table
-                                columns={columns}
-                                data={dataRender}
+                                columns={getColumns}
+                                data={getDataRender}
                             />
                         </div>
                     </div>
@@ -125,7 +132,7 @@ export const FormUseXLSX = () => {
                     <div className="w-full flex flex-col justify-start items-start gap-2">
                         <div className="w-full flex justify-between items-end gap-2">
                             <div className="flex text-white">
-                                TOTAL DE TODOS LOS REGISTROS TOMADOS: {data?.length}
+                                TOTAL DE TODOS LOS REGISTROS TOMADOS: {getData?.length}
                             </div>
                             <div className="flex gap-2">
                                 <div className="flex justify-end items-end">
@@ -140,11 +147,49 @@ export const FormUseXLSX = () => {
                                 </div>
                             </div>
                         </div>
-                        {newColumns.length > 0 && <div className="w-full flex bg-white p-5">
+                        <div className="w-full flex bg-white p-5">
+                            <div className="w-full">
+                                <h3 className="text-md font-semibold">COLUMNAS</h3>
+
+                                <form className="flex justify-start items-center gap-2 py-2" onSubmit={(e) => { e.preventDefault(); insertColumn() }}>
+                                    <input
+                                        value={textNewColumna}
+                                        onChange={(e) => setTextNewColumna(e.target.value)}
+                                        type="text"
+                                        name="valores"
+                                        id="valores"
+                                        placeholder="Nombre de la columna"
+                                        className="py-2 px-3 border border-black rounded"
+                                    />
+                                    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+                                        AGREGAR COLUMNA
+                                    </button>
+                                </form>
+
+                                <ul className="space-y-2 max-h-[25vh] min-h-[25vh] overflow-y-scroll overflow-x-hidden pb-10">
+                                    {getColumns.length > 0 && getColumns.map((n, i) => {
+                                        return (
+                                            <li key={i} className="flex items-center gap-2 border border-black px-5 py-2 rounded">
+                                                <span className="flex-grow font-medium">
+                                                    {n}
+                                                </span>
+                                                <button
+                                                    onClick={() => removeColumn(n)}
+                                                    className="bg-red-500 text-white px-2 py-1 rounded"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </li>
+                                        )
+                                    })}
+                                </ul>
+                            </div>
+                        </div>
+                        {getNewColumns.length > 0 && <div className="w-full flex bg-white p-5">
                             <div className="w-full">
                                 <h3 className="text-md font-semibold">NUEVAS COLUMNAS</h3>
-                                <ul className="space-y-2">
-                                    {newColumns.map((colGroup) => {
+                                <ul className="space-y-2 max-h-[25vh] min-h-[25vh] overflow-y-scroll overflow-x-hidden pb-10">
+                                    {getNewColumns.map((colGroup) => {
                                         const type = colGroup?.type
                                         const isJoin = type === "1"
 
@@ -172,13 +217,27 @@ export const FormUseXLSX = () => {
                     </div>
                 </div>
 
-                <div className="w-full flex justify-end items-start">
+                <div className="w-full flex justify-end items-start gap-2">
                     <button
                         type="button"
-                        onClick={downloadFile}
+                        onClick={() => setModalDonwloadView(true)}
+                        className="bg-blue-500 border border-white px-3 py-2 rounded text-white"
+                    >
+                        EDITAR FINAL
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => downloadFile(true, true)}
                         className="min-w-[200px] bg-green-500 border border-white px-3 py-2 rounded text-white"
                     >
-                        {loadingDonwload ? "DESCARGANDO EDITABLE..." : "DESCARGAR EDITABLE"}
+                        {getLoadingDonwload ? "DESCARGANDO EDITABLE..." : "DESCARGAR EDITABLE FINAL"}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => downloadFile(false)}
+                        className="min-w-[200px] bg-green-500 border border-white px-3 py-2 rounded text-white"
+                    >
+                        {getLoadingDonwload ? "DESCARGANDO EDITABLE..." : "DESCARGAR EDITABLE"}
                     </button>
                 </div>
 
