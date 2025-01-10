@@ -29,6 +29,8 @@ interface Props {
 
   getValoresDonwload: { type: string; valor: string; name: string }[];
   setValoresDonwload: (valor: { type: string; valor: string }[]) => void;
+
+  cleanAllForm: () => void;
 }
 
 //id
@@ -128,6 +130,23 @@ export const useFormStore = create<Props>()(
         set(() => ({ getModalDonwloadView: aux })),
       getUse: false,
       setUse: (aux: boolean) => set(() => ({ getUse: aux })),
+
+      cleanAllForm: () => {
+        set(() => ({
+          getValoresDonwload: base_valores_donwload,
+          getSheetRespete: [],
+          getColumns: [],
+          getData: [],
+          getDataForSheet: {},
+          getDataRender: [],
+          getNewColumns: [],
+          getValoresColumn: [],
+          getLoadingDonwload: false,
+          getUseColumnView: false,
+          getModalDonwloadView: false,
+          getUse: false,
+        }));
+      },
     }),
     {
       name: "xx-form-store-xx",

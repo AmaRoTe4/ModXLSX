@@ -6,7 +6,8 @@ import { cleanObjectKeys } from "../controls/cleanObjectKeys";
 export const parseFile = (
   file: File,
   useSheets?: string[],
-  useColumns?: string[]
+  useColumns?: string[],
+  normalize: boolean = true
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     const fileExtension = file.name.split(".").pop()?.toLowerCase();
@@ -28,20 +29,20 @@ export const parseFile = (
         try {
           const data = new Uint8Array(event.target?.result as ArrayBuffer);
           const workbook = XLSX.read(data, { type: "array" });
+          const { individual, res } = extraerInfo(workbook, useSheets);
 
-          if (useColumns?.length === 0)
-            useColumns = Object.keys(
-              workbook.Sheets[Object.keys(workbook.Sheets)[0]]
+          if (normalize) {
+            const { valores, valores_for_sheet } = resultadoNormalize(
+              res,
+              individual,
+              useColumns
             );
 
-          const { individual, res } = extraerInfo(workbook, useSheets);
-          const { valores, valores_for_sheet } = resultadoNormalize(
-            res,
-            individual,
-            useColumns
-          );
+            resolve({ valores, valores_for_sheet });
+            return;
+          }
 
-          resolve({ valores, valores_for_sheet });
+          resolve({ valores: res, valores_for_sheet: res });
         } catch (error) {
           reject(error);
         }
@@ -129,6 +130,8 @@ const normalizeDataFile = (val: any[], use_use: boolean, cols: string[]) => {
       )
     : [];
   const col_length = columns_use.length;
+
+  if (cols.length === 0) return val;
 
   return val
     ?.filter((n, i) => {

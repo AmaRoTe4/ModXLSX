@@ -3,7 +3,7 @@ import { cartelError } from "../../functions/carteles/swal"
 import { parseFile } from "../../functions/csv/uploadCSV"
 import { downloadFile } from "../../functions/csv/dowloadCSV"
 
-export default function useXLSX(useSheets?: string[], useColumns?: string[], restart?: () => void) {
+export default function useXLSX({ restart, useColumns, useSheets, normalize = true }: { useSheets?: string[], useColumns?: string[], restart?: () => void, normalize?: boolean }) {
     const [loading, setLoading] = useState(false)
     const [valoresUpload, setValoresUpload] = useState<any[]>([])
     const [valoresUploadForSheet, setValoresUploadForSheet] = useState<any[]>([])
@@ -36,7 +36,7 @@ export default function useXLSX(useSheets?: string[], useColumns?: string[], res
             setLoading(true);
 
             try {
-                const parsedData = await parseFile(file, useSheets, useColumns);
+                const parsedData = await parseFile(file, useSheets, useColumns, normalize);
                 setValoresUpload(parsedData?.valores);
                 setValoresUploadForSheet(parsedData?.valores_for_sheet);
                 return parsedData;
@@ -59,7 +59,7 @@ export default function useXLSX(useSheets?: string[], useColumns?: string[], res
             setLoading(true);
 
             try {
-                const parsedData = await parseFile(file, useSheets, useColumns);
+                const parsedData = await parseFile(file, useSheets, useColumns, normalize);
                 setValoresUpload(parsedData?.valores);
                 setValoresUploadForSheet(parsedData?.valores_for_sheet);
                 return parsedData;

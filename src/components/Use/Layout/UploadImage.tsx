@@ -41,7 +41,7 @@ const UploadImage: React.FC<UploadImageProps> = ({
 
         const result = await response.json();
         setResponseMessage('¡Subida exitosa!');
-        console.log('Respuesta del servidor:', result);
+        console.info('Respuesta del servidor:', result);
       } catch (error) {
         console.error('Error al subir los archivos:', error);
         setResponseMessage('Error al subir los archivos. Inténtalo de nuevo.');

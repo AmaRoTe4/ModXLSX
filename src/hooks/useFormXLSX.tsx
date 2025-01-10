@@ -38,7 +38,7 @@ const base_sheet = [
 
 export default function useFormXLSX() {
     const {
-        getSheetRespete, getColumns, getData, getDataRender, getLoadingDonwload, getNewColumns, getUse, getUseColumnView, getValoresColumn, setColumns, setData, setDataRender, setLoadingDonwload, setNewColumns, setSheetRespete, setUse, setUseColumnView, setValoresColumn, setDataForSheet, getValoresDonwload, getDataForSheet
+        getSheetRespete, getColumns, getData, getDataRender, getLoadingDonwload, getNewColumns, getUse, getUseColumnView, getValoresColumn, setColumns, setData, setDataRender, setLoadingDonwload, setNewColumns, setSheetRespete, setUse, setUseColumnView, setValoresColumn, setDataForSheet, getValoresDonwload, getDataForSheet, cleanAllForm
     } = useFormStore()
     const {
         file,
@@ -48,7 +48,7 @@ export default function useFormXLSX() {
         onDownloadFile,
         valoresUpload,
         valoresUploadForSheet
-    } = useXLSX(getSheetRespete, getColumns, () => setUse(false))
+    } = useXLSX({ useSheets: getSheetRespete, useColumns: getColumns, restart: () => setUse(false) })
     const [textNewColumna, setTextNewColumna] = useState("")
 
     useEffect(() => {
@@ -197,6 +197,7 @@ export default function useFormXLSX() {
         setDataRender([])
         setNewColumns([])
         setValoresColumn([])
+        cleanAllForm()
     }
 
     const insertColumn = () => {
