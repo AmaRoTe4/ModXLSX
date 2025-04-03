@@ -103,7 +103,7 @@ export default function useFormLPTECFIL() {
                 descripcion
             }
 
-            if (precio === 0 || nombre.length === 0) return;
+            if (!precio || isNaN(precio) || precio === 0 || nombre.length === 0 || precio > 10000000000) return;
 
             data_use.push(valor)
         })
