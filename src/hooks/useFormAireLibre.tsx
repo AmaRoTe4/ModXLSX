@@ -35,7 +35,7 @@ export default function useFormAireLibre() {
     useEffect(() => {
         if (valoresUpload?.length > 0) {
             setUse(true)
-        } else if (valoresUpload?.length === 0) {
+        } else if (!valoresUpload || valoresUpload?.length === 0) {
             setUse(false)
         }
 
@@ -72,6 +72,8 @@ export default function useFormAireLibre() {
 
         const filter_data_1 = data.filter(n => {
             let new_latest_1 = n["1"]
+
+            console.log({ n })
 
             if ((typeof new_latest_1 === "number" && latest_1 === undefined) || (typeof new_latest_1 === "undefined" && typeof latest_1 === "number")) {
                 latest_1 = new_latest_1
@@ -125,6 +127,7 @@ export default function useFormAireLibre() {
     }
 
     const dowloadInfo = async () => {
+        console.log(getData)
         if (getData.length === 0) return alert("NO TIENE INFO");
 
         setLoadingDowload(true)

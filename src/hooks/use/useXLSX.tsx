@@ -5,6 +5,7 @@ import { downloadFile } from "../../functions/csv/dowloadCSV"
 
 export default function useXLSX({ restart, useColumns, useSheets, normalize = true }: { useSheets?: string[], useColumns?: string[], restart?: () => void, normalize?: boolean }) {
     const [loading, setLoading] = useState(false)
+    const [valores, setValores] = useState<any[]>([])
     const [valoresUpload, setValoresUpload] = useState<any[]>([])
     const [valoresUploadForSheet, setValoresUploadForSheet] = useState<any[]>([])
     const [file, setFile] = useState<File | undefined>(undefined);
@@ -12,7 +13,7 @@ export default function useXLSX({ restart, useColumns, useSheets, normalize = tr
     useEffect(() => {
         if (file) handleFileReload()
         else if (restart) restart()
-    }, [useColumns])
+    }, [useColumns, file]) // este es un cambio a tene en cuenta
 
     const onDownloadFile = async (file?: any[], name: string = "index") => {
         if (loading) return;
@@ -37,6 +38,7 @@ export default function useXLSX({ restart, useColumns, useSheets, normalize = tr
 
             try {
                 const parsedData = await parseFile(file, useSheets, useColumns, normalize);
+                setValores(JSON.parse(JSON.stringify(parsedData)))
                 setValoresUpload(parsedData?.valores);
                 setValoresUploadForSheet(parsedData?.valores_for_sheet);
                 return parsedData;
@@ -88,6 +90,7 @@ export default function useXLSX({ restart, useColumns, useSheets, normalize = tr
         valoresUpload,
         file,
         onDownloadFile,
-        valoresUploadForSheet
+        valoresUploadForSheet,
+        valores
     }
 }
