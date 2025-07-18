@@ -59,8 +59,6 @@ export default function useFormAireLibre() {
     const filter_data_1 = data.filter((n) => {
       let new_latest_1 = n["1"];
 
-      console.log({ n });
-
       if (
         (typeof new_latest_1 === "number" && latest_1 === undefined) ||
         (typeof new_latest_1 === "undefined" && typeof latest_1 === "number")
@@ -102,7 +100,10 @@ export default function useFormAireLibre() {
           marca,
           precio,
           ...actual_1,
+          nombre: actual_1.nombre + ` (${marca})`,
         };
+
+        if (!Boolean(valor_add.precio)) return;
 
         data_use.push(valor_add);
 
